@@ -63,7 +63,7 @@ BulkOrigin <- function(ip.list,host="v4.whois.cymru.com",port=43) {
 
   # trim header, split fields and convert results
   response = response[2:length(response)]
-  response = lapply(response,function(n) {
+  response = laply(response,function(n) {
     sapply(strsplit(n,"|",fixed=TRUE),trim)
   })  
   response = adply(response,c(1))
@@ -106,7 +106,7 @@ BulkPeer <- function(ip.list,host="v4-peer.whois.cymru.com",port=43) {
   
   # trim header, split fields and convert results
   response = response[2:length(response)]
-  response = lapply(response,function(n) {
+  response = laply(response,function(n) {
     sapply(strsplit(n,"|",fixed=TRUE),trim)
   })  
   response = adply(response,c(1))
