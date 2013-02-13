@@ -223,5 +223,3 @@ Alien.Vault.Reputation <- function(refresh=FALSE) {
   return(av.df)
   
 }
-
-
