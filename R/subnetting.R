@@ -34,37 +34,47 @@ ip2int <- function(ip) {
 }
 
 findBegin <- function(network, CIDR) {
-  if (CIDR > 32 | CIDR < 0) stop("illegal subnet size")
+#  if (CIDR > 32 | CIDR < 0) stop("illegal subnet size")
   networkInt = ip2int(network) - (ip2int(network) %% (2^32 / 2^CIDR))
   return (int2ip(networkInt))
 }
 
 findEnd <- function(network, CIDR) {
-  if (CIDR >32 | CIDR < 0) stop("illegal subnet size")
+#  if (CIDR >32 | CIDR < 0) stop("illegal subnet size")
   networkInt = ip2int(network) - (ip2int(network) %% (2^32 / 2^CIDR))
   return (int2ip(networkInt + (2^32 / 2^CIDR) - 1))
 }
 
 isWithin <- function(ip, network, CIDR) {
-# unexpected results when more than one IP or network as input  
+  if (length(CIDR) > 1 & length(network) != length(CIDR)) stop("a single CIDR is applied to all networks, or each network needs a CIDR");
   beginInt <- ip2int(findBegin(network, CIDR))
   endInt <- ip2int(findEnd(network, CIDR))
   ipInt <- ip2int(ip)
-  if (beginInt <= ipInt & ipInt <= endInt) {
-    return(TRUE)
-  } else {
-    return (FALSE)
+  for (eachIP in ipInt){
+    for (eachInt in 1:(length(beginInt))) {
+      if (beginInt[eachInt] < eachIP & eachIP < endInt[eachInt]){
+        print(paste(int2ip(eachIP), "is within", int2ip(beginInt[eachInt]), int2ip(endInt[eachInt])))
+      }
+    }
   }
 }
 
-isBogon <- function(ip) {
-# CAUTION, DOWNLOADING THIS FILE EACH TIME isBogon is run might get you blocked
-  b <- read.table("http://www.team-cymru.org/Services/Bogons/fullbogons-ipv4.txt", comment.char="#", colClasses=c("character"))
+isBogon <- function(ip, refresh=FALSE) {
+# Thanks for being awesome, TC!
+  
+  bogon.dir <- file.path(path.expand("~"),".ipcache")
+  bogon.file <- file.path(bogon.dir,"bogons.txt")
+  dir.create(bogon.dir, showWarnings=FALSE)
+  
+  if (refresh || file.access(bogon.file)) {
+    bogon.url <- "http://www.team-cymru.org/Services/Bogons/fullbogons-ipv4.txt";
+    download.file(bogon.url, bogon.file)
+  }
+  
+  b <- read.table(bogon.file, comment.char="#", colClasses=c("character"))
   b <- laply(b, .fun=function(n) {strsplit(n,"/", fixed=TRUE)})
   b <- adply(b, c(1))
   b <- b[-1]
   names(b) <- c("network","CIDR")
-  return (any(daply(b, c("network","CIDR"), .fun=function(n){
-    isWithin(ip, n$network, as.numeric(n$CIDR))
-  })==TRUE, na.rm=TRUE))
+  isWithin(ip, b$network, as.numeric(b$CIDR))
 }
