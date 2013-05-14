@@ -76,7 +76,7 @@ BulkOrigin <- function(ip.list,host="v4.whois.cymru.com",port=43) {
 
 BulkASN <- function(asn.list,host="v4.whois.cymru.com",port=43) {
   
-  # Retrieves BGP Origin ASN info for a list of IP addresses
+  # Retrieves basic AS info for a list of ASN
   #
   # NOTE: IPv4 version
   #
@@ -85,7 +85,7 @@ BulkASN <- function(asn.list,host="v4.whois.cymru.com",port=43) {
   # be accurate.
   #
   # Args:
-  #   ip.list : character vector of IP addresses
+  #   asn.list : character vector of AS numbers 
   #   host: which server to hit for lookup (defaults to Team Cymru's server)
   #   post: TCP port to use (defaults to 43)
   #
