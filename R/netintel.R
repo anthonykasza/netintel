@@ -74,6 +74,49 @@ BulkOrigin <- function(ip.list,host="v4.whois.cymru.com",port=43) {
   
 }
 
+BulkASN <- function(asn.list,host="v4.whois.cymru.com",port=43) {
+  
+  # Retrieves BGP Origin ASN info for a list of IP addresses
+  #
+  # NOTE: IPv4 version
+  #
+  # NOTE: The Team Cymru's service is NOT a GeoIP service!
+  # Do not use this function for that as your results will not
+  # be accurate.
+  #
+  # Args:
+  #   ip.list : character vector of IP addresses
+  #   host: which server to hit for lookup (defaults to Team Cymru's server)
+  #   post: TCP port to use (defaults to 43)
+  #
+  # Returns:
+  #   data frame of BGP Origin ASN lookup results
+  
+  
+  # setup query
+  cmd = "begin\nverbose\n" 
+  asns = paste(unlist(asn.list), collapse="\n")
+  cmd = sprintf("%s%s\nend\n",cmd,asns)
+  
+  # setup connection and post query
+  con = socketConnection(host=host,port=port,blocking=TRUE,open="r+")  
+  cat(cmd,file=con)
+  response = readLines(con)
+  close(con)
+
+  # trim header, split fields and convert results
+  response = response[2:length(response)]
+  response = laply(response,function(n) {
+    sapply(strsplit(n,"|",fixed=TRUE),trim)
+  })  
+  response = adply(response,c(1))
+  response = response[,2:length(response)]
+  names(response) = c("AS","CC","Registry","Allocated","AS Name")
+  
+  return(response)
+  
+}
+
 BulkPeer <- function(ip.list,host="v4-peer.whois.cymru.com",port=43) {
   
   # Retrieves BGP Peer ASN info for a list of IP addresses
